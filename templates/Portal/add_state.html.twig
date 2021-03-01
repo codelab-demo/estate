@@ -1,0 +1,478 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dodaj nieruchomość{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+
+    <link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"/>
+
+
+
+    <style>
+        #mapid {
+            height: 350px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .my-center {
+            display: flex;
+            justify-content: center;
+        }
+
+    </style>
+{% endblock %}
+{% block body %}
+<div role="main" class="main">
+
+    <section class="page-header page-header-modern bg-color-light-scale-1 page-header-md">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 order-2 order-md-1 align-self-center p-static">
+                    <h1 class="text-dark">Nowa nieruchomość</h1>
+                </div>
+                <div class="col-md-4 order-1 order-md-2 align-self-center">
+                    <ul class="breadcrumb d-block text-md-right">
+                        <li><a href="{{ path('index') }}">Strona główna</a></li>
+                        <li class="active">Nowa nieruchomość</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-12">
+
+                <h4 class="text-primary mt-4">Dodawanie nieruchmości</h4>
+                <p>Wypełnij poniższy formularz, aby dodać nieruchomość.</p>
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                <form id="new-estate" class="" method="POST" enctype="multipart/form-data">
+
+
+                    <div class="heading heading-border heading-middle-border mt-5 mb-5">
+                        <h3 class="font-weight-normal">Lokalizacja na mapie</h3>
+                    </div>
+
+                    {# <h4 class="mt-3 mb-3" id="map">Lokalizacja na mapie</h4> #}
+                    <div id="mapid" class="mb-0"></div>
+                    <input type="hidden" id="lat" value="" maxlength="100" class="form-control" name="lat" required>
+                    <input type="hidden" id="long" value="" maxlength="100" class="form-control" name="long" required>
+                    <div class="heading heading-border heading-middle-border mt-5 mb-5">
+                        <h3 class="font-weight-normal">Dane adresowe</h3>
+                    </div>
+
+                    <div class="form-row" id="map-data">
+                        <div class="form-group col-lg-6">
+                            <label>Adres</label>
+                            <input type="text" value="" data-msg-required="Podaj adres" maxlength="100"
+                                   class="form-control" name="address" required>
+                        </div>
+                        <div class="form-group col-lg-6">
+                            <label>Miejscowość</label>
+                            <input type="text" value="" data-msg-required="Podaj miejscowość" maxlength="100"
+                                   class="form-control" name="city" required>
+                        </div>
+                    </div>
+                    <div class="heading heading-border heading-middle-border mt-3 mb-5">
+                        <h3 class="font-weight-normal">Typ ogłoszenia</h3>
+                    </div>
+                    {# <h4 class="text-primary mt-4">Informacje o nieruchomości</h4> #}
+                    <div class="form-row">
+
+
+                        <div class="form-group col-lg-6">
+                            <div class="pretty p-default p-smooth" style="font-size: 20px;">
+                                <input type="radio" name="type" value="na sprzedaż" required=""
+                                       data-msg-required="Wybierz typ"/>
+                                <div class="state p-info">
+
+                                    <label>Nieruchomość na sprzedaż</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-6">
+                            <div class="pretty p-default p-smooth" style="font-size: 20px;">
+                                <input type="radio" name="type" value="na wynajem" required=""
+                                       data-msg-required="Wybierz typ"/>
+                                <div class="state p-info">
+
+                                    <label>Nieruchomość na wynajem</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="heading heading-border heading-middle-border mt-3 mb-5">
+                        <h3 class="font-weight-normal">Informacje o nieruchomości</h3>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-3">
+                            <label>Cena</label>
+                            <input type="text" value="" data-msg-required="Wprowadź cenę nieruchomości." maxlength="10"
+                                   class="form-control" name="price" required style="width:60%">
+                        </div>
+                        <div class="form-group col-lg-3">
+                            <label>Ilość pokoi</label>
+                            <input type="text" value="" data-msg-required="Wprowadź ilość pokoi nieruchomości."
+                                   maxlength="2" class="form-control" name="rooms" required style="width:60%">
+                        </div>
+                        <div class="form-group col-lg-3">
+                            <label>Ilość pięter</label>
+                            <input type="text" value="" data-msg-required="Wprowadź ilość pięter nieruchomości."
+                                   maxlength="1" class="form-control" name="floor" required style="width:60%">
+                        </div>
+                        <div class="form-group col-lg-3">
+                            <label>Powierzchnia</label>
+                            <div class="input-group mb-2">
+                                <input type="text" value="" data-msg-required="Wprowadź powierzchnię nieruchomości"
+                                       maxlength="10" class="form-control" name="sq" required style="width:60%" id="sq">
+                                <div class="input-group-append">
+                                    <span class="input-group-text"> &#13217;</span>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div class="heading heading-border heading-middle-border mt-3 mb-5">
+                        <h3 class="font-weight-normal">Udogodnienia nieruchomości</h3>
+                    </div>
+                    <div class="form-row">
+
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Klimatyzacja"/>
+                                <div class="state p-info">
+
+                                    <label>Klimatyzacja</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Garaż"/>
+                                <div class="state p-info">
+
+                                    <label>Garaż</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Piwnica"/>
+                                <div class="state p-info">
+
+                                    <label>Piwnica</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Balkon"/>
+                                <div class="state p-info">
+
+                                    <label>Balkon</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Centralne ogrzewanie"/>
+                                <div class="state p-info">
+
+                                    <label>Centralne ogrzewanie</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Ogród"/>
+                                <div class="state p-info">
+
+                                    <label>Ogród</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Basen"/>
+                                <div class="state p-info">
+
+                                    <label>Basen</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-lg-4">
+                            <div class="pretty p-default p-smooth" style="font-size: 24px;">
+                                <input type="checkbox" name="features[]" value="Taras"/>
+                                <div class="state p-info">
+
+                                    <label>Taras</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="heading heading-border heading-middle-border mt-3 mb-5">
+                        <h3 class="font-weight-normal">Opis nieruchomości</h3>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Opis</label>
+                            <textarea maxlength="5000" data-msg-required="Opisz dodawaną nieruchomość." rows="5"
+                                      class="form-control" name="description" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="heading heading-border heading-middle-border mt-3 mb-5">
+                        <h3 class="font-weight-normal">Zdjęcie i podgląd</h3>
+                    </div>
+                    <div class="form-row text-align-center my-center">
+                        <div class="form-group col-12 my-center">
+                            <input type="file" name="image" id="fileupload" style="width:200px; display:none;"/>
+                            <input type="button" value="Wybierz zdjęcie" onclick="$('#fileupload').click();"/>
+                        </div>
+
+
+                        <div id="" class="form-group col-md-6 col-lg-4 properties-listing sort-destination p-0">
+
+
+                            <div class=" p-3 isotope-item">
+                                <div class="listing-item">
+
+                                    <div class="thumb-info thumb-info-lighten border">
+                                        <div class="thumb-info-wrapper m-0">
+                                            <img id="blah"
+                                                 src="https://via.placeholder.com/1200x890?text=Wgraj+swoje+zdjęcie"
+                                                 class="img-fluid" alt="">
+                                            <div id="preview-type"
+                                                 class="thumb-info-listing-type bg-color-secondary  text-uppercase text-color-light font-weight-semibold p-1 pl-3 pr-3">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="thumb-info-price bg-color-primary text-color-light text-4 p-2 pl-4 pr-4">
+                                            <span id="preview-price">&nbsp</span> PLN<span id="preview-rent"></span>
+                                            <i class="fas fa-caret-right text-color-secondary float-right"></i>
+                                        </div>
+                                        <div class="custom-thumb-info-title b-normal p-4">
+                                            <div class="thumb-info-inner text-3"><span
+                                                        id="preview_address">&nbsp;</span> | <span id="preview_city">&nbsp;</span>
+                                            </div>
+                                            <ul class="accommodations text-uppercase font-weight-bold p-0 mb-0 text-2">
+                                                <li>
+															<span class="accomodation-title">
+																Pokoje:
+															</span>
+                                                    <span class="accomodation-value custom-color-1" id="preview-rooms">
+																&nbsp;
+															</span>
+                                                </li>
+
+                                                <li>
+															<span class="accomodation-title">
+																Powierzchnia:
+															</span>
+                                                    <span class="accomodation-value custom-color-1" id="preview-sq">
+																&nbsp;
+															</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <input type="submit" value="Dodaj nieruchomość" class="btn btn-secondary mb-4">
+                        </div>
+
+
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    {% endblock %}
+
+    {% block customjs %}
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+                integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+                crossorigin=""></script>
+        <script>
+
+
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#blah').attr('src', e.target.result);
+                    }
+
+                    reader.readAsDataURL(input.files[0]); // convert to base64 string
+                }
+            }
+
+            $("#fileupload").change(function () {
+                readURL(this);
+            });
+            $("#new-estate").submit(function (event) {
+                event.preventDefault();
+
+                if ($('#lat').val() == '' || $('#long').val() == '') {
+                    alert("Wybierz lokalizację na mapie.");
+                    return;
+                }
+                if ($('#fileupload').get(0).files.length === 0) {
+                    alert("Wybierz zdjęcie.");
+                    return;
+                }
+                $("#new-estate")[0].submit();
+
+            });
+
+
+            var map = L.map('mapid');
+
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+                maxZoom: 16,
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1
+            }).addTo(map);
+
+            var mp;
+            {# var marker = L.marker([{{ estate.location.coordinates[0] }},{{ estate.location.coordinates[1] }}]).addTo(map); #}
+            // marker.bindPopup("<b>Jestem tutaj!</b>").openPopup();
+
+            map.on("click", function (e) {
+                if (mp) { // check
+                    map.removeLayer(mp); // remove
+                }
+
+                function prepareBubble(data) {
+                    var text;
+                    console.log($.trim(data.address))
+
+                    if ($.trim(data.address)) {
+                        text = $.trim(data.address);
+                    }
+                    if ($.trim(data.house_number) && $.trim(data.address)) {
+                        text = text + ' ' + $.trim(data.house_number);
+
+                    }
+                    $("#preview_address").html($.trim(text));
+                    if ($.trim(text)) {
+                        $("input[name='address']").val(text);
+                        if ($.trim(data.city)) {
+                            text = text + ", " + data.city;
+                        }
+                    } else if ($.trim(data.city)) {
+                        text = data.city;
+                    }
+
+
+                    $("input[name='city']").val($.trim(data.city));
+                    $("#preview_city").html($.trim(data.city));
+
+                    return text;
+                }
+
+                mp = new L.Marker([e.latlng.lat, e.latlng.lng], {draggable: 'true'});
+                mp.on('dragend', function (event) {
+                    var marker = event.target;
+                    var position = marker.getLatLng();
+                    mp.setLatLng(new L.LatLng(position.lat, position.lng));
+                    map.panTo(new L.LatLng(position.lat, position.lng))
+                    $.get("{{ path('api_geocode') }}", {
+                        latitude: position.lat,
+                        longtitude: position.lng
+                    }, function (data, status) {
+                        var text = prepareBubble(data);
+
+                        if ($.trim(text).length)
+                            mp.bindPopup(text).openPopup();
+                    });
+                });
+                mp.addTo(map);
+                $('#lat').val(e.latlng.lat);
+                $('#long').val(e.latlng.lng);
+                $.get("{{ path('api_geocode') }}", {
+                    latitude: e.latlng.lat,
+                    longtitude: e.latlng.lng
+                }, function (data, status) {
+                    var text = prepareBubble(data);
+
+                    if ($.trim(text).length)
+                        mp.bindPopup(text).openPopup();
+
+                });
+                // console.log(mp.getLatLng());
+            });
+
+
+            function onLocationError(e) {
+                map.setView([50, 19], 9);
+                // alert(e.message);
+            }
+
+            // map.on('locationfound', onLocationFound);
+            map.on('locationerror', onLocationError);
+            // map.setView([50.04954741965677,  -700.0550079345704], 9);
+
+            map.locate({setView: true, maxZoom: 16});
+            $('.leaflet-container').css('cursor', 'crosshair');
+            $('.mapid').css('cursor', 'crosshair');
+
+            $('input[type=radio][name=type]').change(function () {
+                console.log(this.value)
+                $('#preview-type').html(this.value);
+                if (this.value === 'na wynajem') {
+                    $('#preview-rent').html('/mc');
+                } else {
+                    $('#preview-rent').html('');
+                }
+
+            });
+
+            $('input[name=rooms]').on('input', function (e) {
+                $('#preview-rooms').html(this.value);
+
+            });
+            $('input[name=sq]').on('input', function (e) {
+                $('#preview-sq').html(this.value + ' &#13217;');
+
+            });
+
+            $('input[name=price]').on('input', function (e) {
+                $('#preview-price').html(this.value);
+
+            });
+        </script>
+    {% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+
+    <div role="main" class="main">
+
+        <section class="page-header page-header-modern bg-color-light-scale-1 page-header-md">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 order-2 order-md-1 align-self-center p-static">
+                        <h1 class="text-dark">Wyszukiwarka nieruchomości</h1>
+                    </div>
+                    <div class="col-md-4 order-1 order-md-2 align-self-center">
+                        <ul class="breadcrumb d-block text-md-right">
+                            <li><a href="{{ path('index') }}">Strona główna</a></li>
+                            <li class="active">Wyszukiwarka nieruchomości</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <form id="propertiesForm" action="{{ path('search') }}" method="POST">
+                            <div class="form-row">
+                                <div class="form-group col-lg-2 mb-0">
+                                    <div class="form-control-custom mb-3">
+                                        <select class="form-control text-uppercase text-2" name="propertiesPropertyType" data-msg-required="This field is required."
+                                                id="propertiesPropertyType2">
+                                            <option value="">Rodzaj</option>
+                                            <option value="na wynajem" {% if postData['type'] == 'na wynajem' %}selected{% endif %}>Na wynajem</option>
+                                            <option value="na sprzedaż" {% if postData['type'] == 'na sprzedaż' %}selected{% endif %}>Na sprzedaż</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-2 mb-0">
+                                    <div class="form-control-custom mb-3">
+                                        <select class="form-control"   name="propertiesLocation" data-msg-required="This field is required."
+                                                id="propertiesLocation2">
+                                            <option value="">Lokalizacja</option>
+                                            {% for location in locations %}
+                                            <option value="{{ location['_id'] }}" {% if postData['location'] == location['_id'] %}selected{% endif %}>{{ location['_id'] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-2 mb-0">
+                                    <div class="form-control-custom mb-3">
+                                        <input type="text" class="form-control text-uppercase text-2" name="propertiesMinPrice" data-msg-required="This field is required."
+                                                id="propertiesMinPrice2"  placeholder="Cena minimalna" value ="{{ postData['minPrice'] }}">
+
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-2 mb-0">
+                                    <div class="form-control-custom mb-3">
+                                        <input type="text" class="form-control text-uppercase text-2" name="propertiesMaxPrice" data-msg-required="This field is required."
+                                                id="propertiesMaxPrice2"  placeholder="Cena minimalna" value ="{{ postData['maxPrice'] }}">
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-2 mb-0">
+                                    <input type="submit" value="Szukaj" class="btn btn-secondary btn-lg btn-block text-uppercase text-2">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <div class="row mb-4 properties-listing sort-destination p-0">
+
+                {% for estate in searchResults %}
+                    <div class="col-md-6 col-lg-4 p-3 isotope-item">
+                        <div class="listing-item">
+                            <a href="{{ path('property', {'id':  estate.id }) }}" class="text-decoration-none">
+                                <div class="thumb-info thumb-info-lighten border">
+                                    <div class="thumb-info-wrapper m-0">
+                                        <img src="/uploads/{{  estate.images.0 }}" class="img-fluid" alt="">
+                                        <div class="thumb-info-listing-type bg-color-secondary text-uppercase text-color-light font-weight-semibold p-1 pl-3 pr-3">
+                                            {{  estate.type }}
+                                        </div>
+                                    </div>
+                                    <div class="thumb-info-price bg-color-primary text-color-light text-4 p-2 pl-4 pr-4">
+                                        {{ estate.price|number_format(2,","," ") }} PLN{% if estate.type == 'na wynajem' %}/mc {% endif %}
+                                        <i class="fas fa-caret-right text-color-secondary float-right"></i>
+                                    </div>
+                                    <div class="custom-thumb-info-title b-normal p-4">
+                                        <div class="thumb-info-inner text-3">{{  estate.address }} | {{ estate.city }}</div>
+                                        <ul class="accommodations text-uppercase font-weight-bold p-0 mb-0 text-2">
+                                            <li>
+															<span class="accomodation-title">
+																Pokoje:
+															</span>
+                                                <span class="accomodation-value custom-color-1">
+																{{ estate.estateDetails['pokoje'] }}
+															</span>
+                                            </li>
+
+                                            <li>
+															<span class="accomodation-title">
+																Powierzchnia:
+															</span>
+                                                <span class="accomodation-value custom-color-1">
+																{{ estate.estateDetails['powierzchnia'] }} &#13217;
+															</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+{% endblock %}
+
+    {% block customjs %}
+        <script>
+            // $(document).ready(function() {
+            //     $('#propertiesLocation2').select2({
+            //         placeholder: 'Select an option'
+            //     });
+            //
+            // });
+
+        </script>
+    {% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{  parent() }}
+<style>
+    ul.pagination {
+        display: flex;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+
+
+    <div role="main" class="main">
+
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col">
+                            <h2 class="font-weight-normal mb-2">
+                                Oferty mieszkań i domów na <strong class="text-color-secondary font-weight-extra-bold">sprzedaż</strong> <span class="font-weight-light">lub</span> <strong class="text-color-secondary font-weight-extra-bold">wynajem</strong>
+                            </h2>
+                        </div>
+                    </div>
+                    <div id="" class="row properties-listing sort-destination p-0" data-total-pages="2">
+                        {% for estate in allEstates %}
+                            <div class="col-md-6 col-lg-4 p-3 isotope-item">
+                                <div class="listing-item">
+                                    <a href="{{ path('property', {'id':  estate.id }) }}" class="text-decoration-none">
+                                        <div class="thumb-info thumb-info-lighten border">
+                                            <div class="thumb-info-wrapper m-0">
+                                                <img src="/uploads/{{  estate.images[0] }}" class="img-fluid" alt="">
+                                                <div class="thumb-info-listing-type bg-color-secondary text-uppercase text-color-light font-weight-semibold p-1 pl-3 pr-3">
+                                                    {{  estate.type }}
+                                                </div>
+                                            </div>
+                                            <div class="thumb-info-price bg-color-primary text-color-light text-4 p-2 pl-4 pr-4">
+                                                {{ estate.price|number_format(2,","," ") }} PLN{% if estate.type == 'na wynajem' %}/mc {% endif %}
+                                                <i class="fas fa-caret-right text-color-secondary float-right"></i>
+                                            </div>
+                                            <div class="custom-thumb-info-title b-normal p-4">
+                                                <div class="thumb-info-inner text-3">{{ estate.city }}</div>
+                                                <ul class="accommodations text-uppercase font-weight-bold p-0 mb-0 text-2">
+                                                    <li>
+															<span class="accomodation-title">
+																Pokoje:
+															</span>
+                                                        <span class="accomodation-value custom-color-1">
+																{{ estate.estateDetails['pokoje'] }}
+															</span>
+                                                    </li>
+
+                                                    <li>
+															<span class="accomodation-title">
+																Powierzchnia:
+															</span>
+                                                        <span class="accomodation-value custom-color-1">
+																{{ estate.estateDetails['powierzchnia'] }} &#13217;
+															</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                    <div id="" class="row align-items-center">
+                        <div class="col-12 text-center">
+
+                            <ul class="pagination pagination-lg">
+                                {% if currentPage != 1 %}<li class="page-item"><a class="page-link" href="{{path('browse') }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                                {% for item in 1..lastPage %}
+                                <li class="page-item {% if loop.index == currentPage %}active{% endif %}">
+                                    <a class="page-link"
+                                    {% if loop.index == 1 %} href="{{path('browse') }}">
+                                    {% else %} href="{{ path('browse_page', {'page':loop.index})}}">
+                                        {% endif %}
+                                    {{ loop.index }}</a></li>
+
+                                {% endfor %}
+                                {% if lastPage != currentPage %}<a class="page-link" href="{{ path('browse_page', {'page':currentPage+1})}}"><i class="fas fa-angle-right"></i></a>{% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+

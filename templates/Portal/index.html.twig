@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+
+    <div role="main" class="main">
+
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col">
+                            <h2 class="font-weight-normal mb-2">
+                                Oferty mieszkań i domów na <strong class="text-color-secondary font-weight-extra-bold">sprzedaż</strong> <span class="font-weight-light">lub</span> <strong class="text-color-secondary font-weight-extra-bold">wynajem</strong>
+                            </h2>
+                        </div>
+                    </div>
+                    <div id="listingLoadMoreWrapper" class="row properties-listing sort-destination p-0" data-total-pages="2">
+                        {% for estate in homeEstates %}
+                        <div class="col-md-6 col-lg-4 p-3 isotope-item">
+                            <div class="listing-item">
+                                <a href="{{ path('property', {'id':  estate['_id'] }) }}" class="text-decoration-none">
+                                    <div class="thumb-info thumb-info-lighten border">
+                                        <div class="thumb-info-wrapper m-0">
+                                            <img src="/uploads/{{  estate['image'] }}" class="img-fluid" alt="">
+                                            <div class="thumb-info-listing-type bg-color-secondary text-uppercase text-color-light font-weight-semibold p-1 pl-3 pr-3">
+                                                {{  estate['type'] }}
+                                            </div>
+                                        </div>
+                                        <div class="thumb-info-price bg-color-primary text-color-light text-4 p-2 pl-4 pr-4">
+                                            {{ estate['price']|number_format(2,","," ") }} PLN{% if estate['type'] == 'na wynajem' %}/mc {% endif %}
+                                            <i class="fas fa-caret-right text-color-secondary float-right"></i>
+                                        </div>
+                                        <div class="custom-thumb-info-title b-normal p-4">
+                                            <div class="thumb-info-inner text-3">{{  estate['address'] }} | {{ estate['city'] }}</div>
+                                            <ul class="accommodations text-uppercase font-weight-bold p-0 mb-0 text-2">
+                                                <li>
+															<span class="accomodation-title">
+																Pokoje:
+															</span>
+                                                    <span class="accomodation-value custom-color-1">
+																{{ estate['estateDetails']['pokoje'] }}
+															</span>
+                                                </li>
+
+                                                <li>
+															<span class="accomodation-title">
+																Powierzchnia:
+															</span>
+                                                    <span class="accomodation-value custom-color-1">
+																{{ estate['estateDetails']['powierzchnia'] }} &#13217;
+															</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                    <div id="listingLoadMoreBtnWrapper" class="row align-items-center" style="min-height: 140px;">
+                        <div class="col text-center">
+                            <div id="listingLoadMoreLoader" class="listing-load-more-loader">
+                                <div class="bounce-loader">
+                                    <div class="bounce1"></div>
+                                    <div class="bounce2"></div>
+                                    <div class="bounce3"></div>
+                                </div>
+                            </div>
+
+                            <a href="{{ path('browse') }}"><button id="" type="button" class="btn btn-secondary btn-xs text-3 text-uppercase outline-none custom-padding-1">Zobacz więcej ofert...</button></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-lg-12">
+
+
+                    <div class="row pb-2">
+                        <div class="col">
+                            <h2 class="font-weight-normal mt-1 mb-0">Najpopularniejsze miejsca</h2>
+                        </div>
+                    </div>
+                    <div class="row pb-4 mb-4">
+                        {% for place in topPlaces %}
+                        <div class="col-md-3 mt-3">
+                            <div class="special-offer-item text-center text-color-light">
+                                <a href="{{ path('search-city', {'city':place['_id']}) }}" class="text-decoration-none">
+											<span class="special-offer-wrapper">
+												<img src="img/city.jpg" class="img-fluid" alt="">
+												<span class="special-offer-infos text-color-light">
+													<span class="special-offer-title font-weight-normal text-5 p-1 mb-2">
+                                                        {{ place['_id'] }}
+													</span>
+													<span class="btn btn-secondary text-uppercase custom-padding-1 d-inline-block">Oferty: {{ place['quantity'] }} </span>
+												</span>
+											</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="col-md-3 mt-3">
+                            <div class="special-offer-item text-center text-color-light">
+                                <a href="" class="text-decoration-none">
+											<span class="special-offer-wrapper">
+												<img src="img/city.jpg" class="img-fluid" alt="">
+												<span class="special-offer-infos text-color-light">
+													<span class="special-offer-title font-weight-normal text-5 p-1 mb-2">
+														i wiele innych ...
+													</span>
+													<span class="btn btn-secondary text-uppercase custom-padding-1 d-inline-block">Zobacz więcej</span>
+												</span>
+											</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
