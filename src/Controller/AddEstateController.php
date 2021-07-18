@@ -62,54 +62,35 @@ class AddEstateController extends AbstractController
             /** @var UploadedFile $uploadedFile */
             $uploadedFile = $request->files->get('image');
             if($uploadedFile) {
-                $destination = $this->getParameter('kernel.project_dir') . '/public/uploads/images/';
 
-                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $newFilename =  Urlizer::urlize($originalFilename) . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+                $errors = $this->validateImage($validator, $uploadedFile);
 
-                $violations = $validator->validate(
-                    $uploadedFile,
-                    new Image([
-                        'maxSize' => '2M'
-                    ])
-                );
-                // jeśli są błądy w zdjęciu
-                if ($violations->count() > 0) {
-                    /** @var ConstraintViolation $violation */
-                    $violation = $violations[0];
-                    $errors[] = 'Wrong image.';
-                    $this->addFlash('error', $violation->getMessage());
-                } else {
-                // jeśli brak błedów
-//                if (empty($errors)) {
+                if(empty($errors)) {
 
-                    $uploadedFile->move(
-                        $destination,
-                        $newFilename
-                    );
+                    $newFilename = $this->moveUploadedFile($uploadedFile);
 
-                $estate = new Estate();
-                $estate->setImages(array('images/'.$newFilename));
-                $estate->setDescription($description);
-                $estate->setType($type);
-                $estate->setLocation(array('type'=> "Point", 'coordinates'=> array( $lat,$long )));
-                $estate->setCity($city);
-                $estate->setAddress($address);
-                $estate->setName($address);
-                $estate->setPrice($price);
-                $estate->setEstateDetails(array('pokoje'=>$rooms, 'powierzchnia'=>$sq,'piętro'=>$floor));
+                    $estate = new Estate();
+                    $estate->setImages(array('images/' . $newFilename));
+                    $estate->setDescription($description);
+                    $estate->setType($type);
+                    $estate->setLocation(array('type' => "Point", 'coordinates' => array($lat, $long)));
+                    $estate->setCity($city);
+                    $estate->setAddress($address);
+                    $estate->setName($address);
+                    $estate->setPrice($price);
+                    $estate->setEstateDetails(array('pokoje' => $rooms, 'powierzchnia' => $sq, 'piętro' => $floor));
 
-                foreach($features as $key=>$item) {
-                    $features_array[$item] = true;
+                    foreach ($features as $key => $item) {
+                        $features_array[$item] = true;
                     }
 
-                $estate->setFeatures($features_array);
+                    $estate->setFeatures($features_array);
 
-
-                $dm->persist($estate);
-                $dm->flush();
-                return new RedirectResponse($this->router->generate('property',['id' =>$estate->getId()]));
+                    $dm->persist($estate);
+                    $dm->flush();
                 }
+                return new RedirectResponse($this->router->generate('property',['id' =>$estate->getId()]));
+
             }
 
         }
@@ -119,5 +100,46 @@ class AddEstateController extends AbstractController
         return $this->render('Portal/add_state.html.twig', [
             'controller_name' => 'AddEstateController',
         ]);
+    }
+
+    /**
+     * @param ValidatorInterface $validator
+     * @param UploadedFile $uploadedFile
+     */
+    public function validateImage(ValidatorInterface $validator, UploadedFile $uploadedFile): array
+    {
+        $violations = $validator->validate(
+            $uploadedFile,
+            new Image([
+                'maxSize' => '2M'
+            ])
+        );
+        // jeśli są błądy w zdjęciu
+        if ($violations->count() > 0) {
+            /** @var ConstraintViolation $violation */
+            $violation = $violations[0];
+            $errors[] = 'Wrong image.';
+            $this->addFlash('error', $violation->getMessage());
+
+            return $errors;
+        }
+    }
+
+    /**
+     * @param UploadedFile $uploadedFile
+     * @return string
+     */
+    public function moveUploadedFile(UploadedFile $uploadedFile): string
+    {
+        $destination = $this->getParameter('kernel.project_dir') . '/public/uploads/images/';
+
+        $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $newFilename = Urlizer::urlize($originalFilename) . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+
+        $uploadedFile->move(
+            $destination,
+            $newFilename
+        );
+        return $newFilename;
     }
 }

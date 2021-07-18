@@ -16,7 +16,7 @@ class PropertyController extends AbstractController
      */
     public function index(EstateRepository $estateRepository, $id): Response
     {
-//        $estate = $dm->getRepository(Estate::class)->findBy(['slug'=>$slug]);
+
         $estate = $estateRepository->find($id);
         $homeEstates = $estateRepository->findRandom();
 

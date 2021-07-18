@@ -23,21 +23,13 @@ class SearchController extends AbstractController
         if ($request->isMethod('POST')) {
             $type = filter_var($request->request->get('propertiesPropertyType'),FILTER_SANITIZE_STRING);
             $location = filter_var($request->request->get('propertiesLocation'),FILTER_SANITIZE_STRING);
-//            $minRooms = IntVal($request->request->get('propertiesMinRooms'));
+
             $minPrice = $request->request->get('propertiesMinPrice');
             $maxPrice = $request->request->get('propertiesMaxPrice');
 
             $error = false;
-            if($minPrice > $maxPrice) {
-                $error = true;
-                $this->addFlash('error', 'Wartość minimalna nie możę być wyższa od maksymalnej');
-            }
+            $error = $this->validateInput($minPrice, $maxPrice);
 
-            if($minPrice < 0 || $maxPrice < 0) {
-                $error = true;
-                $this->addFlash('error', 'Wartość nie mogą być ujemne');
-
-            }
             $postData = array('type'=>$type, 'location'=>$location, 'minPrice'=>$minPrice, 'maxPrice'=>$maxPrice);
             if(!$error) {
                 $searchResults = $estateRepository->findBySearch($type, $location,$minPrice,$maxPrice);
@@ -55,5 +47,27 @@ class SearchController extends AbstractController
             'searchResults' => $searchResults,
             'postData' => $postData
         ]);
+    }
+
+    /**
+     * @param $minPrice
+     * @param $maxPrice
+     * @return bool
+     */
+    public function validateInput($minPrice, $maxPrice): bool
+    {
+        $error = false;
+
+        if ($minPrice > $maxPrice) {
+            $error = true;
+            $this->addFlash('error', 'Wartość minimalna nie możę być wyższa od maksymalnej');
+        }
+
+        if ($minPrice < 0 || $maxPrice < 0) {
+            $error = true;
+            $this->addFlash('error', 'Wartość nie mogą być ujemne');
+
+        }
+        return $error;
     }
 }
